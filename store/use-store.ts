@@ -35,13 +35,13 @@ export const useStore = create<State>(set => ({
       const currentUnread = state.unreadMessages[fromId] || 0;
       const unreadMessages = {
         ...state.unreadMessages,
-        [fromId]: currentUnread + 1
+        [fromId]: currentUnread + 1,
       };
-      
+
       return {
         unreadCount: Object.values(unreadMessages).reduce((a, b) => a + b, 0),
         unreadMessages,
-        latestSenderId: fromId
+        latestSenderId: fromId,
       };
     }),
 
@@ -52,7 +52,7 @@ export const useStore = create<State>(set => ({
         delete unreadMessages[senderId];
         return {
           unreadMessages,
-          unreadCount: Object.values(unreadMessages).reduce((a, b) => a + b, 0)
+          unreadCount: Object.values(unreadMessages).reduce((a, b) => a + b, 0),
         };
       }
       return { unreadCount: 0, unreadMessages: {} };
@@ -68,12 +68,11 @@ export const useStore = create<State>(set => ({
           chatOpen: true,
           activeChatUserId: userId,
           unreadMessages,
-          unreadCount: Object.values(unreadMessages).reduce((a, b) => a + b, 0)
+          unreadCount: Object.values(unreadMessages).reduce((a, b) => a + b, 0),
         };
       }
       return { chatOpen: true, activeChatUserId: userId };
     }),
 
-  closeChat: () => 
-    set({ chatOpen: false, activeChatUserId: null }),
+  closeChat: () => set({ chatOpen: false, activeChatUserId: null }),
 }));

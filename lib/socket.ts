@@ -20,30 +20,35 @@ export function initSocket(userId?: string) {
   socket.on('message', (msg: any) => {
     try {
       console.log('[Socket] Message received:', msg);
-      
+
       // Extract IDs, handling both string and object formats
       const receiverId = msg.receiverId?._id || msg.receiverId;
       const senderId = msg.senderId?._id || msg.senderId;
 
-      console.log('[Socket] Parsed IDs:', { receiverId, senderId, myUserId: userId });
-      
+      console.log('[Socket] Parsed IDs:', {
+        receiverId,
+        senderId,
+        myUserId: userId,
+      });
+
       // only increment unread if this message is for current user and not from them
       if (receiverId === userId && senderId !== userId) {
         console.log('[Socket] Message is for me, checking chat state...');
-        
+
         const state = useStore.getState();
         console.log('[Socket] Current chat state:', {
           chatOpen: state.chatOpen,
           activeChatUserId: state.activeChatUserId,
-          unreadCount: state.unreadCount
+          unreadCount: state.unreadCount,
         });
 
         // Always track latest sender
         useStore.setState(state => ({
           latestSenderId: senderId,
-          unreadCount: state.chatOpen && state.activeChatUserId === senderId 
-            ? state.unreadCount  // don't increment if chat is open with sender
-            : state.unreadCount + 1
+          unreadCount:
+            state.chatOpen && state.activeChatUserId === senderId
+              ? state.unreadCount // don't increment if chat is open with sender
+              : state.unreadCount + 1,
         }));
 
         console.log('[Socket] Updated store:', useStore.getState());
