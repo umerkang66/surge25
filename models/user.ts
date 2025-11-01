@@ -58,9 +58,7 @@ const UserSchema = new Schema<IUser>(
     major: String,
     graduationYear: Number,
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
 // Indexes for performance
