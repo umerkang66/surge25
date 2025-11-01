@@ -74,8 +74,6 @@ export const authOptions: AuthOptions = {
     async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
-        // ✅ include emailVerified in token
-        token.emailVerified = user.emailVerified ?? null;
       }
 
       if (trigger === 'update' && session) {
@@ -88,10 +86,6 @@ export const authOptions: AuthOptions = {
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
-        // ✅ include emailVerified in session
-        session.user.emailVerified = (
-          token.emailVerified as string
-        )?.toString();
       }
       return session;
     },

@@ -100,6 +100,13 @@ export default function SignInPage() {
             className="w-full px-4 py-3 rounded-lg bg-gray-50 dark:bg-neutral-800 border border-gray-300 dark:border-neutral-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 outline-none focus:border-gray-900 dark:focus:border-gray-300 focus:ring-1 focus:ring-gray-400 dark:focus:ring-gray-500 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
           />
 
+          <p
+            onClick={() => router.push('/auth/reset-request')}
+            className="text-sm text-gray-700 dark:text-gray-300 hover:underline cursor-pointer text-right"
+          >
+            Forgot your password?
+          </p>
+
           <button
             type="submit"
             disabled={loading}

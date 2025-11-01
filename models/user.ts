@@ -16,6 +16,8 @@ export interface IUser {
   graduationYear?: number;
   createdAt: Date;
   updatedAt: Date;
+  resetToken?: string;
+  resetTokenExpiry?: Date | number;
 }
 
 const UserSchema = new Schema<IUser>(
@@ -35,6 +37,8 @@ const UserSchema = new Schema<IUser>(
       minlength: [2, 'Name must be at least 2 characters'],
       maxlength: [50, 'Name cannot exceed 50 characters'],
     },
+    resetToken: String,
+    resetTokenExpiry: Date,
     password: {
       type: String,
       select: false, // Don't return password in queries by default
