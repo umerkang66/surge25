@@ -89,9 +89,7 @@ export async function POST(req: NextRequest) {
       resume,
     });
 
-    const populatedApplication = await Application.findById(
-      application._id
-    ).populate('jobPostId');
+    const populatedApplication = await Application.findById(application._id);
 
     return NextResponse.json(
       { application: populatedApplication },
