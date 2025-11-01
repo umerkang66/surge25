@@ -23,10 +23,6 @@ export default function JobCard({ job }: { job: any }) {
           <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
             {job.type}
           </span>
-          <span className="text-sm text-gray-500">
-            {job.applicationsCount || 0}{' '}
-            {job.applicationsCount === 1 ? 'applicant' : 'applicants'}
-          </span>
         </div>
         <Link
           href={`/jobs/${job._id}`}
