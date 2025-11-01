@@ -4,11 +4,13 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
-import { User, MapPin, DollarSign, Mail } from 'lucide-react';
+import { User, MapPin, DollarSign, Mail, MessageCircle } from 'lucide-react';
+import ChatWindow from '@/components/chat-window';
 
 interface Applicant {
   _id: string;
   applicantId: {
+    _id: string;
     name: string;
     email: string;
     university?: string;
@@ -21,6 +23,7 @@ export default function JobApplicationsPage() {
   const { id } = useParams();
   const [applicants, setApplicants] = useState<Applicant[]>([]);
   const [loading, setLoading] = useState(true);
+  const [chatUserId, setChatUserId] = useState<string | null>(null); // active chat user
 
   useEffect(() => {
     if (!id) return;
@@ -70,13 +73,13 @@ export default function JobApplicationsPage() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
-              className="bg-white dark:bg-neutral-900 p-6 rounded-2xl shadow-xl border border-gray-200 dark:border-neutral-800 transition-colors hover:shadow-2xl"
+              className="bg-white dark:bg-neutral-900 p-6 rounded-2xl shadow-xl border border-gray-200 dark:border-neutral-800 transition-colors hover:shadow-2xl relative"
             >
               <div className="flex items-center gap-4 mb-4">
                 <div className="w-12 h-12 bg-gray-200 dark:bg-neutral-700 rounded-full flex items-center justify-center text-gray-600 dark:text-gray-300">
                   <User className="w-6 h-6" />
                 </div>
-                <div>
+                <div className="flex-1">
                   <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                     {applicant.applicantId.name}
                   </h2>
@@ -84,6 +87,14 @@ export default function JobApplicationsPage() {
                     <Mail className="w-4 h-4" /> {applicant.applicantId.email}
                   </p>
                 </div>
+                {/* Chat button */}
+                <button
+                  onClick={() => setChatUserId(applicant.applicantId._id)}
+                  className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-neutral-800 transition"
+                  title={`Chat with ${applicant.applicantId.name}`}
+                >
+                  <MessageCircle className="w-5 h-5 text-green-500" />
+                </button>
               </div>
 
               <div className="space-y-1 text-gray-600 dark:text-gray-400 text-sm mb-3">
@@ -106,6 +117,20 @@ export default function JobApplicationsPage() {
               </p>
             </motion.div>
           ))}
+        </div>
+      )}
+
+      {/* Chat Window Overlay */}
+      {chatUserId && (
+        <div className="fixed bottom-4 right-4 w-[450px] max-w-full z-50">
+          <ChatWindow otherUserId={chatUserId} key={chatUserId} />
+          <button
+            onClick={() => setChatUserId(null)}
+            className="absolute top-0 right-0 -translate-y-2 translate-x-2 bg-red-500 cursor-pointer text-white rounded-full py-1 px-2 hover:bg-red-600 shadow-lg"
+            title="Close chat"
+          >
+            ✕
+          </button>
         </div>
       )}
     </section>

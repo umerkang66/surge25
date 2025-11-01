@@ -1,7 +1,10 @@
+'use client';
+
 import { initSocket, getSocket } from '@/lib/socket';
 import api from '@/lib/api';
 import { useSession } from 'next-auth/react';
 import { useEffect, useRef, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function ChatWindow({ otherUserId }: { otherUserId: string }) {
   const { data: session } = useSession();
@@ -9,11 +12,11 @@ export default function ChatWindow({ otherUserId }: { otherUserId: string }) {
   const [text, setText] = useState('');
   const ref = useRef<HTMLDivElement | null>(null);
 
-  function scrollBottom() {
+  const scrollBottom = () => {
     setTimeout(() => {
       ref.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
     }, 100);
-  }
+  };
 
   useEffect(() => {
     async function fetchMessages() {
@@ -28,6 +31,7 @@ export default function ChatWindow({ otherUserId }: { otherUserId: string }) {
 
     fetchMessages();
     const s = initSocket();
+
     s.on('message', (msg: any) => {
       if (
         (msg.senderId === otherUserId &&
@@ -35,14 +39,16 @@ export default function ChatWindow({ otherUserId }: { otherUserId: string }) {
         (msg.senderId === session?.user?.id && msg.receiverId === otherUserId)
       ) {
         setMessages(m => [...m, msg]);
+        scrollBottom();
       }
     });
+
     return () => {
-      /* no cleanup to keep socket global */
+      /* socket is global, no cleanup */
     };
   }, [otherUserId, session?.user?.id]);
 
-  async function send() {
+  const send = async () => {
     if (!text.trim()) return;
     try {
       const res = await api.post('/messages', {
@@ -57,35 +63,66 @@ export default function ChatWindow({ otherUserId }: { otherUserId: string }) {
     } catch (e) {
       console.error(e);
     }
-  }
+  };
 
   return (
-    <div className="border rounded p-3 mt-2">
-      <div className="h-64 overflow-auto space-y-2">
-        {messages.map(m => (
-          <div
-            key={m._id}
-            className={`p-2 rounded ${
-              m.senderId._id === session?.user?.id
-                ? 'bg-slate-200 self-end'
-                : 'bg-white'
-            }`}
-          >
-            <div className="text-sm">{m.content}</div>
-            <div className="text-xs text-gray-400">
-              {new Date(m.createdAt).toLocaleString()}
-            </div>
-          </div>
-        ))}
+    <div className="flex flex-col h-full max-h-[500px] border border-gray-200 dark:border-neutral-800 rounded-2xl shadow-lg bg-white dark:bg-neutral-900 overflow-hidden">
+      {/* Chat Header */}
+      <div className="px-4 py-2 bg-gray-100 dark:bg-neutral-800 border-b border-gray-200 dark:border-neutral-700 font-semibold text-gray-800 dark:text-gray-100">
+        Chat
+      </div>
+
+      {/* Chat Messages */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        <AnimatePresence initial={false}>
+          {messages.map(m => {
+            const isMe = m.senderId._id === session?.user?.id;
+            return (
+              <motion.div
+                key={m._id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className={`flex flex-col max-w-xs ${
+                  isMe ? 'ml-auto items-end' : 'mr-auto items-start'
+                }`}
+              >
+                <div
+                  className={`px-4 py-2 rounded-2xl break-words shadow-sm text-sm ${
+                    isMe
+                      ? 'bg-green-500 text-white rounded-br-none'
+                      : 'bg-gray-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-100 rounded-bl-none'
+                  }`}
+                >
+                  {m.content}
+                </div>
+                <span className="text-xs text-gray-400 mt-1">
+                  {new Date(m.createdAt).toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </span>
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
         <div ref={ref} />
       </div>
-      <div className="flex gap-2 mt-2">
+
+      {/* Input */}
+      <div className="flex items-center gap-2 px-4 py-3 border-t border-gray-200 dark:border-neutral-700 bg-gray-50 dark:bg-neutral-800">
         <input
+          type="text"
+          placeholder="Type a message..."
           value={text}
           onChange={e => setText(e.target.value)}
-          className="flex-1 p-2 border rounded"
+          onKeyDown={e => e.key === 'Enter' && send()}
+          className="flex-1 p-3 rounded-2xl border border-gray-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-400 dark:focus:ring-green-600"
         />
-        <button onClick={send} className="px-3 py-1 border rounded">
+        <button
+          onClick={send}
+          className="cursor-pointer px-4 py-2 rounded-2xl bg-green-500 text-white hover:bg-green-600 transition"
+        >
           Send
         </button>
       </div>

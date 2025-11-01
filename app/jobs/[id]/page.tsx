@@ -6,6 +6,7 @@ import Image from 'next/image';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, MapPin, DollarSign, Eye, X } from 'lucide-react';
+import ChatWindow from '@/components/chat-window';
 
 interface UserType {
   _id: string;
@@ -31,6 +32,7 @@ export default function JobPage() {
   const { id } = useParams();
   const router = useRouter();
 
+  const [showChatWindow, setShowChatWindow] = useState(false);
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
@@ -241,14 +243,36 @@ export default function JobPage() {
               </button>
             </>
           ) : (
-            <button
-              onClick={() => setShowApplyModal(true)}
-              className="cursor-pointer px-6 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
-            >
-              Apply
-            </button>
+            <>
+              <button
+                onClick={() => setShowApplyModal(true)}
+                className="cursor-pointer px-6 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
+              >
+                Apply
+              </button>
+
+              <button
+                onClick={() => setShowChatWindow(true)}
+                className="cursor-pointer px-6 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
+              >
+                Chat with Seeker
+              </button>
+            </>
           )}
         </div>
+
+        {showChatWindow && (
+          <div className="fixed bottom-4 right-4 w-[450px] max-w-full z-50">
+            <ChatWindow key={Math.random()} otherUserId={job.creatorId._id} />
+            <button
+              onClick={() => setShowChatWindow(false)}
+              className="absolute top-0 right-0 -translate-y-2 translate-x-2 bg-red-500 cursor-pointer text-white rounded-full py-1 px-2 hover:bg-red-600 shadow-lg"
+              title="Close chat"
+            >
+              ✕
+            </button>
+          </div>
+        )}
       </motion.div>
 
       {/* Delete Modal */}
