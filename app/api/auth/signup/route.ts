@@ -7,8 +7,6 @@ export async function POST(req: NextRequest) {
   try {
     const { email, password, name, university, major } = await req.json();
 
-    console.log('🌟🌟🌟🌟 umer did this');
-
     // Validation
     if (!email || !password || !name) {
       return NextResponse.json(

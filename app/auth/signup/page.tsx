@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { motion } from 'framer-motion';
-import { UserPlus } from 'lucide-react';
+import { UserPlus, Loader2 } from 'lucide-react';
 
 export default function SignUpPage() {
   const [form, setForm] = useState({
@@ -15,17 +15,30 @@ export default function SignUpPage() {
     university: '',
     major: '',
   });
-
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (loading) return; // Prevent multiple submissions
+    setLoading(true);
+
+    const toastId = toast.loading('Creating your account...');
+
     try {
-      await api.post('/auth/signup', form);
-      toast.success('Account created — please sign in');
+      const res = await api.post('/auth/signup', form);
+      toast.success('Account created successfully — please sign in!', {
+        id: toastId,
+      });
       router.push('/auth/signin');
     } catch (err: any) {
-      toast.error(err.message || 'Signup failed');
+      const message =
+        err.response?.data?.message ||
+        err.message ||
+        'Signup failed. Please try again.';
+      toast.error(message, { id: toastId });
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -37,6 +50,7 @@ export default function SignUpPage() {
         transition={{ duration: 0.5, ease: 'easeOut' }}
         className="w-full max-w-md bg-white dark:bg-neutral-900 rounded-2xl shadow-xl p-8 border border-gray-200 dark:border-neutral-800 transition-colors"
       >
+        {/* Header */}
         <div className="text-center mb-6">
           <div className="flex justify-center mb-3">
             <UserPlus className="w-10 h-10 text-gray-800 dark:text-gray-100" />
@@ -49,6 +63,7 @@ export default function SignUpPage() {
           </p>
         </div>
 
+        {/* Form */}
         <form onSubmit={onSubmit} className="space-y-4">
           {[
             { key: 'name', placeholder: 'Full name' },
@@ -64,18 +79,32 @@ export default function SignUpPage() {
               type={type || 'text'}
               placeholder={placeholder}
               required
-              className="w-full px-4 py-3 rounded-lg bg-gray-50 dark:bg-neutral-800 border border-gray-300 dark:border-neutral-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-500 outline-none focus:border-gray-900 dark:focus:border-gray-300 focus:ring-1 focus:ring-gray-400 dark:focus:ring-gray-500 transition-all duration-200"
+              disabled={loading}
+              className="w-full px-4 py-3 rounded-lg bg-gray-50 dark:bg-neutral-800 border border-gray-300 dark:border-neutral-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-500 outline-none focus:border-gray-900 dark:focus:border-gray-300 focus:ring-1 focus:ring-gray-400 dark:focus:ring-gray-500 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
             />
           ))}
 
           <button
             type="submit"
-            className="w-full py-3 mt-2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 font-semibold rounded-lg shadow-md hover:shadow-lg hover:bg-gray-800 dark:hover:bg-gray-200 transform hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
+            disabled={loading}
+            className={`w-full py-3 mt-2 flex items-center justify-center gap-2 font-semibold rounded-lg shadow-md transition-all duration-300 ${
+              loading
+                ? 'bg-gray-700 dark:bg-gray-300 text-gray-300 dark:text-gray-700 cursor-not-allowed'
+                : 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 hover:shadow-lg hover:bg-gray-800 dark:hover:bg-gray-200 transform hover:-translate-y-0.5'
+            }`}
           >
-            Sign Up
+            {loading ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Signing Up...
+              </>
+            ) : (
+              'Sign Up'
+            )}
           </button>
         </form>
 
+        {/* Footer */}
         <p className="text-center text-gray-600 dark:text-gray-400 text-sm mt-6">
           Already have an account?{' '}
           <span
