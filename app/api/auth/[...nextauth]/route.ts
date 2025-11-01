@@ -33,6 +33,10 @@ export const authOptions: AuthOptions = {
           throw new Error('Invalid credentials');
         }
 
+        if (!user.emailVerified) {
+          throw new Error('Email Not Verified. Go to your email to verify.');
+        }
+
         const isValid = await bcrypt.compare(
           credentials.password,
           user.password
